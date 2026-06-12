@@ -12,6 +12,7 @@ import { checkoutRoute } from "./routes/checkout";
 import { billingPortalRoute } from "./routes/billingPortal";
 import { favoritesRoute } from "./routes/favorites";
 import { progressRoute } from "./routes/progress";
+import { storyRoute } from "./routes/story";
 import { withClerk } from "./middleware/auth";
 
 const app = new Hono();
@@ -35,6 +36,7 @@ app.route("/api/checkout", checkoutRoute);
 app.route("/api/billing-portal", billingPortalRoute);
 app.route("/api/favorites", favoritesRoute);
 app.route("/api/progress", progressRoute);
+app.route("/api/story", storyRoute);
 
 app.get("/api/hello", (c) => c.json({ message: "Hello from Core Confidence" }));
 

@@ -66,3 +66,5 @@ export interface ProgressStats {
   weekly: WeeklyActivity[];
   recent: RecentCompletion[];
 }
+
+export type StoryContent = Record<string, string>;
