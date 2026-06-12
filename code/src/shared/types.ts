@@ -68,3 +68,29 @@ export interface ProgressStats {
 }
 
 export type StoryContent = Record<string, string>;
+
+export interface AdminWorkout {
+  id: number;
+  title: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  mux_playback_id: string | null;
+  mux_asset_id: string | null;
+  mux_status: "pending" | "ready" | "errored";
+  duration_seconds: number | null;
+  level: WorkoutLevel;
+  category: string | null;
+  is_free: boolean;
+  is_featured: boolean;
+  is_published: boolean;
+  sort_order: number;
+}
+
+export interface AdminPlan {
+  plan_key: PlanKey;
+  display_name: string;
+  amount_cents: number;
+  currency: string;
+  interval: "month" | "year";
+  stripe_price_id: string | null;
+}
