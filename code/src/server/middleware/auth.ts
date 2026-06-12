@@ -1,6 +1,7 @@
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import type { MiddlewareHandler } from "hono";
 import { query } from "../lib/db";
+import { upsertUserFromClerk } from "../lib/userSync";
 
 // Verifies the Clerk session token on every /api request.
 // Reuse the frontend's publishable key (not secret) so only one Clerk key
@@ -39,9 +40,16 @@ export const requireUser: MiddlewareHandler = async (c, next) => {
     `SELECT * FROM users WHERE clerk_user_id = $1`,
     [auth.userId]
   );
-  if (!rows[0]) return c.json({ error: "user not found" }, 404);
 
-  c.set("user", rows[0]);
+  let user = rows[0];
+  if (!user) {
+    // The user.created webhook may not have landed yet — sync directly from Clerk.
+    const synced = await upsertUserFromClerk(c.get("clerk"), auth.userId);
+    if (!synced) return c.json({ error: "user not found" }, 404);
+    user = synced;
+  }
+
+  c.set("user", user);
   await next();
 };
 

@@ -34,8 +34,8 @@ export default function Player() {
         setWorkout(detail);
 
         const index = workouts.findIndex((w) => w.id === detail.id);
-        const next = index >= 0 ? workouts[(index + 1) % workouts.length] : undefined;
-        setUpNext(next && next.id !== detail.id ? next : null);
+        const next = index >= 0 && index < workouts.length - 1 ? workouts[index + 1] : undefined;
+        setUpNext(next ?? null);
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load");
       }

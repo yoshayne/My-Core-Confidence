@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { stripe } from "../lib/stripe";
+import { getAppUrl } from "../lib/appUrl";
 import { requireUser } from "../middleware/auth";
 
 export const billingPortalRoute = new Hono();
@@ -10,7 +11,7 @@ billingPortalRoute.post("/", requireUser, async (c) => {
     return c.json({ error: "no stripe customer" }, 400);
   }
 
-  const appUrl = process.env.APP_URL ?? new URL(c.req.url).origin;
+  const appUrl = getAppUrl(c);
 
   const session = await stripe.billingPortal.sessions.create({
     customer: user.stripe_customer_id,

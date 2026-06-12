@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { query } from "../lib/db";
 import { stripe } from "../lib/stripe";
+import { getAppUrl } from "../lib/appUrl";
 import { requireUser } from "../middleware/auth";
 
 export const checkoutRoute = new Hono();
@@ -34,7 +35,7 @@ checkoutRoute.post("/", requireUser, async (c) => {
     ]);
   }
 
-  const appUrl = process.env.APP_URL ?? new URL(c.req.url).origin;
+  const appUrl = getAppUrl(c);
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",

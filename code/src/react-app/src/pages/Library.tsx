@@ -1,40 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { Bell, Play } from "lucide-react";
 import BottomNav from "../components/BottomNav";
 import CategoryChips from "../components/CategoryChips";
 import WorkoutCard from "../components/WorkoutCard";
-import { useApi, formatDuration } from "../lib/api";
-import type { WorkoutSummary } from "../../../shared/types";
+import { formatDuration } from "../lib/api";
+import { useWorkoutsAndCategories } from "../lib/useWorkoutsAndCategories";
 
 export default function Library() {
   const { user } = useUser();
-  const apiFetch = useApi();
-  const [workouts, setWorkouts] = useState<WorkoutSummary[] | null>(null);
-  const [categories, setCategories] = useState<string[]>([]);
+  const { workouts, categories, error } = useWorkoutsAndCategories();
   const [activeCategory, setActiveCategory] = useState("All");
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const [workoutsRes, categoriesRes] = await Promise.all([
-          apiFetch<{ workouts: WorkoutSummary[] }>("/api/workouts"),
-          apiFetch<{ categories: string[] }>("/api/categories"),
-        ]);
-        if (cancelled) return;
-        setWorkouts(workoutsRes.workouts);
-        setCategories(categoriesRes.categories);
-      } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load");
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [apiFetch]);
 
   const featured = workouts?.find((w) => w.isFeatured);
   const visible = (workouts ?? []).filter(
