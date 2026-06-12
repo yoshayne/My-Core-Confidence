@@ -14,17 +14,31 @@
     "build:server": "tsc -p tsconfig.server.json",
     "postbuild": "node scripts/write-server-package-json.mjs",
     "build": "npm run build:client && npm run build:server",
-    "start": "node dist/server/index.js"
+    "start": "node dist/server/index.js",
+    "migrate": "tsx scripts/migrate.ts"
   },
   "dependencies": {
-    "hono": "^4.6.14",
+    "@aws-sdk/client-s3": "^3.1067.0",
+    "@clerk/backend": "^1.18.0",
+    "@clerk/clerk-react": "^5.17.0",
+    "@hono/clerk-auth": "^2.0.0",
     "@hono/node-server": "^1.13.7",
+    "@mux/mux-node": "^14.1.1",
+    "@mux/mux-player-react": "^3.1.1",
+    "hono": "^4.6.14",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.468.0",
+    "pg": "^8.13.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.0.2"
+    "react-router-dom": "^7.0.2",
+    "stripe": "^17.4.0",
+    "svix": "^1.45.1"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "@vitejs/plugin-react": "^4.3.4",
