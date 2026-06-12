@@ -6,6 +6,7 @@ import Library from "./pages/Library";
 import Workouts from "./pages/Workouts";
 import Player from "./pages/Player";
 import Subscribe from "./pages/Subscribe";
+import SubscribeSuccess from "./pages/SubscribeSuccess";
 import ComingSoon from "./pages/ComingSoon";
 
 export default function App() {
@@ -62,6 +63,14 @@ export default function App() {
         element={
           <SignedIn>
             <Subscribe />
+          </SignedIn>
+        }
+      />
+      <Route
+        path="/subscribe/success"
+        element={
+          <SignedIn>
+            <SubscribeSuccess />
           </SignedIn>
         }
       />

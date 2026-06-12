@@ -31,3 +31,13 @@ export interface WorkoutDetail extends WorkoutSummary {
   muxPlaybackId: string | null;
   playbackToken: string | null;
 }
+
+export type PlanKey = "monthly" | "annual";
+
+export interface SubscriptionPlan {
+  planKey: PlanKey;
+  displayName: string;
+  amountCents: number;
+  currency: string;
+  interval: "month" | "year";
+}
