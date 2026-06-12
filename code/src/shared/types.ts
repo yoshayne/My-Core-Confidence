@@ -1,3 +1,12 @@
 // Shared TypeScript types between the React app and the Hono server.
-// Populated as endpoints are built out (see CLAUDE.md Section 6).
-export {};
+
+export interface UserProfile {
+  id: number;
+  email: string;
+  name: string | null;
+  avatarUrl: string | null;
+  isAdmin: boolean;
+  subscriptionStatus: "free" | "active" | "past_due" | "canceled";
+  subscriptionPlan: "monthly" | "annual" | null;
+  currentPeriodEnd: string | null;
+}

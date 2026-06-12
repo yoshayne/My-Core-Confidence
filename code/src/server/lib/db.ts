@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, type QueryResultRow } from "pg";
 
 // Railway's INTERNAL DB URL usually needs NO SSL; the EXTERNAL proxy URL does.
 const useSsl =
@@ -10,6 +10,9 @@ export const pool = new Pool({
   ssl: useSsl ? { rejectUnauthorized: false } : undefined,
 });
 
-export function query(text: string, params?: unknown[]) {
-  return pool.query(text, params);
+export function query<T extends QueryResultRow = QueryResultRow>(
+  text: string,
+  params?: unknown[]
+) {
+  return pool.query<T>(text, params);
 }
