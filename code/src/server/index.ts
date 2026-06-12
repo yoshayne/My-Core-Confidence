@@ -4,6 +4,8 @@ import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { clerkWebhook } from "./routes/webhooks.clerk";
 import { meRoute } from "./routes/me";
+import { workoutsRoute } from "./routes/workouts";
+import { categoriesRoute } from "./routes/categories";
 import { withClerk } from "./middleware/auth";
 
 const app = new Hono();
@@ -19,6 +21,8 @@ app.route("/api/webhooks/clerk", clerkWebhook);
 // 3. Auth middleware + the rest of /api
 app.use("/api/*", withClerk);
 app.route("/api/me", meRoute);
+app.route("/api/workouts", workoutsRoute);
+app.route("/api/categories", categoriesRoute);
 
 app.get("/api/hello", (c) => c.json({ message: "Hello from Core Confidence" }));
 

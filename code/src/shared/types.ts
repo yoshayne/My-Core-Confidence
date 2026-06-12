@@ -10,3 +10,24 @@ export interface UserProfile {
   subscriptionPlan: "monthly" | "annual" | null;
   currentPeriodEnd: string | null;
 }
+
+export type WorkoutLevel = "Beginner" | "Intermediate" | "Advanced";
+
+export interface WorkoutSummary {
+  id: number;
+  title: string;
+  thumbnailUrl: string | null;
+  durationSeconds: number | null;
+  level: WorkoutLevel;
+  category: string | null;
+  isFree: boolean;
+  isFeatured: boolean;
+  locked: boolean;
+}
+
+export interface WorkoutDetail extends WorkoutSummary {
+  description: string | null;
+  muxStatus: "pending" | "ready" | "errored";
+  muxPlaybackId: string | null;
+  playbackToken: string | null;
+}
