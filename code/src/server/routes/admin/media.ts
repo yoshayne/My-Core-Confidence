@@ -4,10 +4,12 @@ import { mux } from "../../lib/mux";
 import { uploadImage } from "../../lib/bucket";
 import { getAppUrl } from "../../lib/appUrl";
 import { requireUser, requireAdmin } from "../../middleware/auth";
+import { rateLimit } from "../../middleware/rateLimit";
 
 export const adminMediaRoute = new Hono();
 
 adminMediaRoute.use("*", requireUser, requireAdmin);
+adminMediaRoute.use("*", rateLimit({ windowMs: 60_000, max: 20, key: "admin-media" }));
 
 adminMediaRoute.post("/mux-upload", async (c) => {
   const body = await c.req.json<{ workoutId?: number }>().catch(() => ({ workoutId: undefined }));

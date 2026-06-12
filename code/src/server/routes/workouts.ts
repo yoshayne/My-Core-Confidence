@@ -3,6 +3,7 @@ import { query } from "../lib/db";
 import { requireUser } from "../middleware/auth";
 import { canWatch } from "../lib/access";
 import { mintPlaybackToken } from "../lib/muxToken";
+import { rateLimit } from "../middleware/rateLimit";
 import type { WorkoutDetail, WorkoutSummary } from "../../shared/types";
 
 interface WorkoutRow {
@@ -101,7 +102,7 @@ workoutsRoute.get("/:id", requireUser, async (c) => {
   return c.json(workout);
 });
 
-workoutsRoute.post("/:id/complete", requireUser, async (c) => {
+workoutsRoute.post("/:id/complete", requireUser, rateLimit({ windowMs: 60_000, max: 30, key: "workout-complete" }), async (c) => {
   const user = c.get("user");
   const id = Number(c.req.param("id"));
   if (!Number.isInteger(id)) return c.json({ error: "invalid id" }, 400);

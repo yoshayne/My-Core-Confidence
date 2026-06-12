@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { query } from "../../lib/db";
 import { stripe } from "../../lib/stripe";
 import { requireUser, requireAdmin } from "../../middleware/auth";
+import { rateLimit } from "../../middleware/rateLimit";
 
 export const adminPricingRoute = new Hono();
 
@@ -25,7 +26,7 @@ adminPricingRoute.get("/", async (c) => {
   return c.json({ plans: rows });
 });
 
-adminPricingRoute.put("/", async (c) => {
+adminPricingRoute.put("/", rateLimit({ windowMs: 60_000, max: 10, key: "admin-pricing" }), async (c) => {
   const body = await c.req
     .json<{ plan_key?: string; amount_cents?: number }>()
     .catch(() => ({ plan_key: undefined, amount_cents: undefined }));

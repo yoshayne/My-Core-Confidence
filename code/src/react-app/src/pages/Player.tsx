@@ -4,7 +4,7 @@ import MuxPlayer from "@mux/mux-player-react";
 import { ArrowLeft, Heart, CheckCircle2, ChevronRight } from "lucide-react";
 import { useApi, formatDuration } from "../lib/api";
 import { useFavoriteApi } from "../lib/favorites";
-import type { WorkoutDetail, WorkoutSummary } from "../../../shared/types";
+import type { StoryContent, WorkoutDetail, WorkoutSummary } from "../../../shared/types";
 
 export default function Player() {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +14,8 @@ export default function Player() {
 
   const [workout, setWorkout] = useState<WorkoutDetail | null>(null);
   const [upNext, setUpNext] = useState<WorkoutSummary | null>(null);
+  const [strip, setStrip] = useState<WorkoutSummary[]>([]);
+  const [story, setStory] = useState<StoryContent | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -25,9 +27,10 @@ export default function Player() {
       setError(null);
       setWorkout(null);
       try {
-        const [detail, { workouts }] = await Promise.all([
+        const [detail, { workouts }, storyRes] = await Promise.all([
           apiFetch<WorkoutDetail>(`/api/workouts/${id}`),
           apiFetch<{ workouts: WorkoutSummary[] }>("/api/workouts"),
+          apiFetch<StoryContent>("/api/story"),
         ]);
         if (cancelled) return;
 
@@ -39,10 +42,12 @@ export default function Player() {
         setWorkout(detail);
         setIsFavorite(detail.isFavorite);
         setCompleted(false);
+        setStory(storyRes);
 
         const index = workouts.findIndex((w) => w.id === detail.id);
         const next = index >= 0 && index < workouts.length - 1 ? workouts[index + 1] : undefined;
         setUpNext(next ?? null);
+        setStrip(workouts.filter((w) => w.thumbnailUrl).slice(0, 4));
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load");
       }
@@ -189,6 +194,24 @@ export default function Player() {
               </div>
               <ChevronRight className="h-4 w-4 text-text-secondary" />
             </Link>
+          </div>
+        )}
+
+        {strip.length > 0 && (
+          <div className="mt-8">
+            <p className="text-[10px] font-bold tracking-[0.2em] text-text-secondary">
+              {story?.player_strip_title || "WORKOUTS WITH DONOVAN"}
+            </p>
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {strip.map((w) => (
+                <div key={w.id} className="aspect-square overflow-hidden rounded-[10px] bg-[#11161F]">
+                  <img src={w.thumbnailUrl!} alt="" className="h-full w-full object-cover" />
+                </div>
+              ))}
+            </div>
+            {story?.player_strip_tagline && (
+              <p className="mt-3 text-sm text-text-secondary">{story.player_strip_tagline}</p>
+            )}
           </div>
         )}
       </div>

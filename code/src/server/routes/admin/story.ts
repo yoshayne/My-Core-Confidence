@@ -1,12 +1,13 @@
 import { Hono } from "hono";
 import { query } from "../../lib/db";
 import { requireUser, requireAdmin } from "../../middleware/auth";
+import { rateLimit } from "../../middleware/rateLimit";
 
 export const adminStoryRoute = new Hono();
 
 adminStoryRoute.use("*", requireUser, requireAdmin);
 
-adminStoryRoute.put("/", async (c) => {
+adminStoryRoute.put("/", rateLimit({ windowMs: 60_000, max: 10, key: "admin-story" }), async (c) => {
   const body = await c.req.json<Record<string, string>>().catch(() => ({}));
   const entries = Object.entries(body);
   if (entries.length === 0) return c.json({ error: "no fields to update" }, 400);

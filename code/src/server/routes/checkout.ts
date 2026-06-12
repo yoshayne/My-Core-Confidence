@@ -3,10 +3,11 @@ import { query } from "../lib/db";
 import { stripe } from "../lib/stripe";
 import { getAppUrl } from "../lib/appUrl";
 import { requireUser } from "../middleware/auth";
+import { rateLimit } from "../middleware/rateLimit";
 
 export const checkoutRoute = new Hono();
 
-checkoutRoute.post("/", requireUser, async (c) => {
+checkoutRoute.post("/", requireUser, rateLimit({ windowMs: 60_000, max: 5, key: "checkout" }), async (c) => {
   const user = c.get("user");
   const body = await c.req.json<{ plan?: string }>().catch(() => ({ plan: undefined }));
   const planKey = body.plan;

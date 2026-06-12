@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { CheckCircle2, ChevronRight } from "lucide-react";
 import BottomNav from "../components/BottomNav";
 import { useApi, formatDuration } from "../lib/api";
 import type { ProgressStats } from "../../../shared/types";
 
 function formatCompletedAt(iso: string): string {
   const date = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) return "Today";
+  if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
@@ -40,16 +47,16 @@ export default function Progress() {
 
         <div className="mt-4 grid grid-cols-3 gap-3">
           <div className="rounded-card border border-card-border bg-card p-3 text-center">
+            <p className="text-2xl font-bold text-text">{stats?.totalSessions ?? "–"}</p>
+            <p className="mt-1 text-xs text-text-secondary">Workouts</p>
+          </div>
+          <div className="rounded-card border border-card-border bg-card p-3 text-center">
             <p className="text-2xl font-bold text-text">{stats?.thisWeekSessions ?? "–"}</p>
             <p className="mt-1 text-xs text-text-secondary">This week</p>
           </div>
           <div className="rounded-card border border-card-border bg-card p-3 text-center">
             <p className="text-2xl font-bold text-text">{stats?.thisWeekMinutes ?? "–"}</p>
             <p className="mt-1 text-xs text-text-secondary">Minutes</p>
-          </div>
-          <div className="rounded-card border border-card-border bg-card p-3 text-center">
-            <p className="text-2xl font-bold text-text">{stats?.totalSessions ?? "–"}</p>
-            <p className="mt-1 text-xs text-text-secondary">Total</p>
           </div>
         </div>
 
@@ -84,18 +91,16 @@ export default function Progress() {
               to={`/workout/${item.workoutId}`}
               className="flex items-center gap-3 rounded-card border border-card-border bg-card p-3"
             >
-              <div className="h-12 w-16 flex-shrink-0 overflow-hidden rounded-[10px] bg-[#11161F]">
-                {item.thumbnailUrl && (
-                  <img src={item.thumbnailUrl} alt="" className="h-full w-full object-cover" />
-                )}
-              </div>
+              <CheckCircle2 className="h-6 w-6 flex-shrink-0 text-blue" strokeWidth={1.75} />
               <div className="flex-1">
                 <p className="text-sm font-semibold text-text">{item.title}</p>
                 <p className="text-xs text-text-secondary">
-                  {[formatDuration(item.durationSeconds), item.level].filter(Boolean).join(" · ")}
+                  {[formatCompletedAt(item.completedAt), formatDuration(item.durationSeconds)]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </p>
               </div>
-              <p className="text-xs text-text-dim">{formatCompletedAt(item.completedAt)}</p>
+              <ChevronRight className="h-4 w-4 flex-shrink-0 text-text-secondary" />
             </Link>
           ))}
         </div>
