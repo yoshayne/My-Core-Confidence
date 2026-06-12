@@ -23,6 +23,7 @@ export interface WorkoutSummary {
   isFree: boolean;
   isFeatured: boolean;
   locked: boolean;
+  isFavorite: boolean;
 }
 
 export interface WorkoutDetail extends WorkoutSummary {
@@ -40,4 +41,28 @@ export interface SubscriptionPlan {
   amountCents: number;
   currency: string;
   interval: "month" | "year";
+}
+
+export interface RecentCompletion {
+  id: number;
+  workoutId: number;
+  title: string;
+  thumbnailUrl: string | null;
+  level: WorkoutLevel;
+  category: string | null;
+  durationSeconds: number | null;
+  completedAt: string;
+}
+
+export interface WeeklyActivity {
+  day: string;
+  count: number;
+}
+
+export interface ProgressStats {
+  thisWeekSessions: number;
+  thisWeekMinutes: number;
+  totalSessions: number;
+  weekly: WeeklyActivity[];
+  recent: RecentCompletion[];
 }

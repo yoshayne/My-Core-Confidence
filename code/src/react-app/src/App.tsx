@@ -5,9 +5,11 @@ import SsoCallback from "./pages/SsoCallback";
 import Library from "./pages/Library";
 import Workouts from "./pages/Workouts";
 import Player from "./pages/Player";
+import Progress from "./pages/Progress";
+import Favorites from "./pages/Favorites";
 import Subscribe from "./pages/Subscribe";
 import SubscribeSuccess from "./pages/SubscribeSuccess";
-import ComingSoon from "./pages/ComingSoon";
+import Profile from "./pages/Profile";
 
 export default function App() {
   return (
@@ -51,7 +53,7 @@ export default function App() {
             path="/progress"
             element={
               <SignedIn>
-                <ComingSoon title="Progress" />
+                <Progress />
               </SignedIn>
             }
           />
@@ -59,7 +61,15 @@ export default function App() {
             path="/profile"
             element={
               <SignedIn>
-                <ComingSoon title="Profile" />
+                <Profile />
+              </SignedIn>
+            }
+          />
+          <Route
+            path="/profile/favorites"
+            element={
+              <SignedIn>
+                <Favorites />
               </SignedIn>
             }
           />

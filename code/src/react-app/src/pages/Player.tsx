@@ -3,16 +3,21 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import MuxPlayer from "@mux/mux-player-react";
 import { ArrowLeft, Heart, CheckCircle2, ChevronRight } from "lucide-react";
 import { useApi, formatDuration } from "../lib/api";
+import { useFavoriteApi } from "../lib/favorites";
 import type { WorkoutDetail, WorkoutSummary } from "../../../shared/types";
 
 export default function Player() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const apiFetch = useApi();
+  const { addFavorite, removeFavorite } = useFavoriteApi();
 
   const [workout, setWorkout] = useState<WorkoutDetail | null>(null);
   const [upNext, setUpNext] = useState<WorkoutSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [completing, setCompleting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,6 +37,8 @@ export default function Player() {
         }
 
         setWorkout(detail);
+        setIsFavorite(detail.isFavorite);
+        setCompleted(false);
 
         const index = workouts.findIndex((w) => w.id === detail.id);
         const next = index >= 0 && index < workouts.length - 1 ? workouts[index + 1] : undefined;
@@ -60,6 +67,33 @@ export default function Player() {
   const meta = [formatDuration(workout.durationSeconds), workout.level, workout.category]
     .filter(Boolean)
     .join(" · ");
+
+  async function toggleFavorite() {
+    const next = !isFavorite;
+    setIsFavorite(next);
+    try {
+      await (next ? addFavorite(workout!.id) : removeFavorite(workout!.id));
+    } catch {
+      setIsFavorite(!next);
+    }
+  }
+
+  async function markComplete() {
+    if (completing || completed) return;
+    setCompleting(true);
+    try {
+      await apiFetch(`/api/workouts/${workout!.id}/complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ durationWatchedSeconds: workout!.durationSeconds }),
+      });
+      setCompleted(true);
+    } catch {
+      // leave button enabled so the user can retry
+    } finally {
+      setCompleting(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-bg pb-10">
@@ -94,9 +128,13 @@ export default function Player() {
         <button
           type="button"
           aria-label="Favorite"
+          onClick={toggleFavorite}
           className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/40"
         >
-          <Heart className="h-5 w-5 text-white" strokeWidth={1.75} />
+          <Heart
+            className={`h-5 w-5 ${isFavorite ? "fill-blue text-blue" : "text-white"}`}
+            strokeWidth={1.75}
+          />
         </button>
       </div>
 
@@ -111,17 +149,23 @@ export default function Player() {
         <div className="mt-4 flex gap-3">
           <button
             type="button"
-            className="flex flex-1 items-center justify-center gap-2 rounded-button bg-blue py-3 text-sm font-semibold text-white"
+            onClick={markComplete}
+            disabled={completing || completed}
+            className="flex flex-1 items-center justify-center gap-2 rounded-button bg-blue py-3 text-sm font-semibold text-white disabled:opacity-60"
           >
             <CheckCircle2 className="h-4 w-4" />
-            Mark complete
+            {completed ? "Completed" : "Mark complete"}
           </button>
           <button
             type="button"
             aria-label="Favorite"
+            onClick={toggleFavorite}
             className="flex h-12 w-12 items-center justify-center rounded-button border border-card-border bg-card"
           >
-            <Heart className="h-5 w-5 text-text-secondary" strokeWidth={1.75} />
+            <Heart
+              className={`h-5 w-5 ${isFavorite ? "fill-blue text-blue" : "text-text-secondary"}`}
+              strokeWidth={1.75}
+            />
           </button>
         </div>
 

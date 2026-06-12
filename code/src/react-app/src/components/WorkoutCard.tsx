@@ -1,11 +1,28 @@
+import { useState, type MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Lock } from "lucide-react";
 import type { WorkoutSummary } from "../../../shared/types";
 import { formatDuration } from "../lib/api";
+import { useFavoriteApi } from "../lib/favorites";
 
 export default function WorkoutCard({ workout }: { workout: WorkoutSummary }) {
   const to = workout.locked ? "/subscribe" : `/workout/${workout.id}`;
   const duration = formatDuration(workout.durationSeconds);
+
+  const { addFavorite, removeFavorite } = useFavoriteApi();
+  const [isFavorite, setIsFavorite] = useState(workout.isFavorite);
+
+  async function handleToggleFavorite(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    const next = !isFavorite;
+    setIsFavorite(next);
+    try {
+      await (next ? addFavorite(workout.id) : removeFavorite(workout.id));
+    } catch {
+      setIsFavorite(!next);
+    }
+  }
 
   return (
     <Link to={to} className="block">
@@ -19,9 +36,13 @@ export default function WorkoutCard({ workout }: { workout: WorkoutSummary }) {
         <button
           type="button"
           aria-label="Favorite"
+          onClick={handleToggleFavorite}
           className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40"
         >
-          <Heart className="h-4 w-4 text-white" strokeWidth={1.75} />
+          <Heart
+            className={`h-4 w-4 ${isFavorite ? "fill-blue text-blue" : "text-white"}`}
+            strokeWidth={1.75}
+          />
         </button>
 
         {workout.locked && (

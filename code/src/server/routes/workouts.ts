@@ -17,6 +17,7 @@ interface WorkoutRow {
   category: string | null;
   is_free: boolean;
   is_featured: boolean;
+  is_favorite: boolean;
 }
 
 export const workoutsRoute = new Hono();
@@ -25,11 +26,14 @@ workoutsRoute.get("/", requireUser, async (c) => {
   const user = c.get("user");
 
   const { rows } = await query<WorkoutRow>(
-    `SELECT id, title, description, thumbnail_url, mux_playback_id, mux_status,
-            duration_seconds, level, category, is_free, is_featured
-       FROM workouts
-      WHERE is_published = TRUE
-      ORDER BY is_featured DESC, sort_order ASC, id ASC`
+    `SELECT w.id, w.title, w.description, w.thumbnail_url, w.mux_playback_id, w.mux_status,
+            w.duration_seconds, w.level, w.category, w.is_free, w.is_featured,
+            (f.id IS NOT NULL) AS is_favorite
+       FROM workouts w
+       LEFT JOIN favorites f ON f.workout_id = w.id AND f.user_id = $1
+      WHERE w.is_published = TRUE
+      ORDER BY w.is_featured DESC, w.sort_order ASC, w.id ASC`,
+    [user.id]
   );
 
   const workouts: WorkoutSummary[] = rows.map((row) => {
@@ -44,6 +48,7 @@ workoutsRoute.get("/", requireUser, async (c) => {
       isFree: row.is_free,
       isFeatured: row.is_featured,
       locked,
+      isFavorite: row.is_favorite,
     };
   });
 
@@ -56,11 +61,13 @@ workoutsRoute.get("/:id", requireUser, async (c) => {
   if (!Number.isInteger(id)) return c.json({ error: "invalid id" }, 400);
 
   const { rows } = await query<WorkoutRow>(
-    `SELECT id, title, description, thumbnail_url, mux_playback_id, mux_status,
-            duration_seconds, level, category, is_free, is_featured
-       FROM workouts
-      WHERE id = $1 AND is_published = TRUE`,
-    [id]
+    `SELECT w.id, w.title, w.description, w.thumbnail_url, w.mux_playback_id, w.mux_status,
+            w.duration_seconds, w.level, w.category, w.is_free, w.is_featured,
+            (f.id IS NOT NULL) AS is_favorite
+       FROM workouts w
+       LEFT JOIN favorites f ON f.workout_id = w.id AND f.user_id = $2
+      WHERE w.id = $1 AND w.is_published = TRUE`,
+    [id, user.id]
   );
   const row = rows[0];
   if (!row) return c.json({ error: "not found" }, 404);
@@ -85,10 +92,37 @@ workoutsRoute.get("/:id", requireUser, async (c) => {
     isFree: row.is_free,
     isFeatured: row.is_featured,
     locked,
+    isFavorite: row.is_favorite,
     muxStatus: row.mux_status as WorkoutDetail["muxStatus"],
     muxPlaybackId,
     playbackToken,
   };
 
   return c.json(workout);
+});
+
+workoutsRoute.post("/:id/complete", requireUser, async (c) => {
+  const user = c.get("user");
+  const id = Number(c.req.param("id"));
+  if (!Number.isInteger(id)) return c.json({ error: "invalid id" }, 400);
+
+  const body = await c.req
+    .json<{ durationWatchedSeconds?: number }>()
+    .catch(() => ({ durationWatchedSeconds: undefined }));
+
+  const { rows } = await query<{ is_free: boolean }>(
+    `SELECT is_free FROM workouts WHERE id = $1 AND is_published = TRUE`,
+    [id]
+  );
+  const workout = rows[0];
+  if (!workout) return c.json({ error: "not found" }, 404);
+  if (!canWatch(user, workout)) return c.json({ error: "forbidden" }, 403);
+
+  await query(
+    `INSERT INTO workout_completions (user_id, workout_id, duration_watched_seconds)
+     VALUES ($1, $2, $3)`,
+    [user.id, id, body.durationWatchedSeconds ?? null]
+  );
+
+  return c.json({ ok: true });
 });
