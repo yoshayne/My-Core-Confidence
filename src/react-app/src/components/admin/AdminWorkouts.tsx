@@ -117,11 +117,15 @@ export default function AdminWorkouts() {
         sort_order: form.sort_order,
       };
       if (editing === "new") {
-        await apiFetch("/api/admin/workouts", {
+        const created = await apiFetch<AdminWorkout>("/api/admin/workouts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
+        await load();
+        setEditing(created);
+        setForm((f) => ({ ...f, thumbnail_url: created.thumbnail_url }));
+        return;
       } else if (editing) {
         await apiFetch(`/api/admin/workouts/${editing.id}`, {
           method: "PUT",
@@ -367,7 +371,11 @@ export default function AdminWorkouts() {
               </div>
             </Field>
 
-            {editing !== "new" && (
+            {editing === "new" ? (
+              <p className="rounded-button border border-card-border bg-bg px-3 py-2 text-xs text-text-secondary">
+                Save the workout to unlock video upload.
+              </p>
+            ) : (
               <Field label="Video">
                 <div className="flex items-center gap-3">
                   <input

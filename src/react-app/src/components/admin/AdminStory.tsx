@@ -17,7 +17,7 @@ const FIELDS: { key: string; label: string }[] = [
   { key: "tagline", label: "Tagline" },
   { key: "tagline_highlight", label: "Tagline highlight" },
   { key: "subline", label: "Subline" },
-  { key: "hero_image", label: "Hero image" },
+  { key: "hero_image", label: "Landing page photo (trainer)" },
   { key: "signature_image", label: "Signature image" },
   { key: "founder_label", label: "Founder label" },
   { key: "auth_title", label: "Auth title" },
