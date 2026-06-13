@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Upload } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { useApi } from "../../lib/api";
 import type { StoryContent } from "../../../../shared/types";
 
@@ -139,6 +139,16 @@ export default function AdminStory() {
                 <Upload className="h-4 w-4" />
                 {uploadingKey === key ? "Uploading…" : "Upload image"}
               </button>
+              {form[key] && (
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => (f ? { ...f, [key]: "" } : f))}
+                  className="flex items-center gap-2 rounded-button border border-card-border px-3 py-2 text-sm text-red-400 transition hover:bg-bg-raise"
+                >
+                  <X className="h-4 w-4" />
+                  Remove
+                </button>
+              )}
             </div>
           ) : TEXTAREA_KEYS.has(key) ? (
             <textarea

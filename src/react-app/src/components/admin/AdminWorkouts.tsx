@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MoreVertical, Plus, Upload } from "lucide-react";
+import { MoreVertical, Plus, Upload, X } from "lucide-react";
 import { useApi, formatDuration } from "../../lib/api";
 import type { AdminWorkout, WorkoutLevel } from "../../../../shared/types";
 import Modal from "./Modal";
@@ -368,6 +368,16 @@ export default function AdminWorkouts() {
                   <Upload className="h-4 w-4" />
                   {thumbUploading ? "Uploading…" : "Upload image"}
                 </button>
+                {form.thumbnail_url && (
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, thumbnail_url: null }))}
+                    className="flex items-center gap-2 rounded-button border border-card-border px-3 py-2 text-sm text-red-400 transition hover:bg-bg-raise"
+                  >
+                    <X className="h-4 w-4" />
+                    Remove
+                  </button>
+                )}
               </div>
             </Field>
 

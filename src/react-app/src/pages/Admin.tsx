@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { useApi } from "../lib/api";
 import type { UserProfile } from "../../../shared/types";
 import AdminWorkouts from "../components/admin/AdminWorkouts";
@@ -36,7 +37,16 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-bg pb-10">
       <div className="mx-auto max-w-md px-4 pt-6 lg:max-w-4xl lg:px-8">
-        <h1 className="text-2xl font-bold">Admin</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Admin</h1>
+          <Link
+            to="/profile"
+            className="flex items-center gap-1.5 rounded-button border border-card-border px-3 py-2 text-sm font-semibold text-text transition hover:bg-bg-raise"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to profile
+          </Link>
+        </div>
 
         <div className="mt-4 flex gap-1 rounded-button border border-card-border bg-card p-1">
           {TABS.map((t) => (
