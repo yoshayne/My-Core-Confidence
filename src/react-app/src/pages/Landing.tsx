@@ -60,12 +60,6 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-bg px-4 py-8 lg:px-8 lg:py-12">
       <div className="mx-auto flex max-w-md flex-col gap-10 lg:max-w-6xl lg:gap-16">
-        {/* Logo */}
-        <div className="flex flex-col items-center gap-1 pt-2">
-          <span className="text-lg font-extrabold tracking-[0.3em] text-text">CORE</span>
-          <span className="text-xs font-extrabold tracking-[0.4em] text-blue">CONFIDENCE</span>
-        </div>
-
         {/* Hero + Auth */}
         <div className="lg:grid lg:grid-cols-2 lg:items-center lg:gap-16">
           <div>

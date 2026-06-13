@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useSignIn, useSignUp } from "@clerk/clerk-react";
-import { Mail, Lock, Eye, EyeOff, User as UserIcon, ShieldCheck } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User as UserIcon, ShieldCheck, Loader2 } from "lucide-react";
 import { GoogleIcon, AppleIcon } from "./icons";
 
 type Mode = "sign-up" | "sign-in" | "verify";
@@ -24,6 +24,7 @@ export default function AuthCard({
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<"oauth_google" | "oauth_apple" | null>(null);
 
   const isLoaded = mode === "sign-in" ? signInLoaded : signUpLoaded;
 
@@ -31,6 +32,7 @@ export default function AuthCard({
     setError(null);
     const target = mode === "sign-in" ? signIn : signUp;
     if (!target) return;
+    setOauthLoading(strategy);
     try {
       await target.authenticateWithRedirect({
         strategy,
@@ -39,6 +41,7 @@ export default function AuthCard({
       });
     } catch (err) {
       setError(errorMessage(err));
+      setOauthLoading(null);
     }
   }
 
@@ -143,22 +146,32 @@ export default function AuthCard({
       <h2 className="mt-4 text-lg font-bold">{title}</h2>
       <p className="mt-1 text-sm text-text-secondary">{subtitle}</p>
 
-      <div className="mt-5 space-y-3">
+      <div className="mt-5 flex gap-2">
         <button
           type="button"
           onClick={() => handleOAuth("oauth_google")}
-          className="flex w-full items-center justify-center gap-2 rounded-button bg-white py-3 text-sm font-semibold text-gray-900 transition hover:bg-gray-100"
+          disabled={oauthLoading !== null}
+          className="flex flex-1 items-center justify-center gap-2 rounded-button bg-white py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-100 disabled:opacity-60"
         >
-          <GoogleIcon className="h-5 w-5" />
-          Continue with Google
+          {oauthLoading === "oauth_google" ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <GoogleIcon className="h-4 w-4" />
+          )}
+          Google
         </button>
         <button
           type="button"
           onClick={() => handleOAuth("oauth_apple")}
-          className="flex w-full items-center justify-center gap-2 rounded-button border border-card-border bg-transparent py-3 text-sm font-semibold text-text transition hover:bg-bg-raise"
+          disabled={oauthLoading !== null}
+          className="flex flex-1 items-center justify-center gap-2 rounded-button border border-card-border bg-transparent py-2.5 text-sm font-semibold text-text transition hover:bg-bg-raise disabled:opacity-60"
         >
-          <AppleIcon className="h-5 w-5" />
-          Continue with Apple
+          {oauthLoading === "oauth_apple" ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <AppleIcon className="h-4 w-4" />
+          )}
+          Apple
         </button>
       </div>
 
