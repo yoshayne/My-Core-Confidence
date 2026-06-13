@@ -74,14 +74,7 @@ export default function App() {
               </SignedIn>
             }
           />
-          <Route
-            path="/admin"
-            element={
-              <SignedIn>
-                <Admin />
-              </SignedIn>
-            }
-          />
+          <Route path="/admin" element={<Admin />} />
           <Route
             path="/subscribe"
             element={
