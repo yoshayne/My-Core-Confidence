@@ -34,6 +34,7 @@ function splitHighlight(text: string, highlight: string) {
 
 export default function Landing() {
   const [story, setStory] = useState<StoryContent>(DEFAULTS);
+  const [heroAspect, setHeroAspect] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,9 +69,24 @@ export default function Landing() {
         {/* Hero + Auth */}
         <div className="lg:grid lg:grid-cols-2 lg:items-center lg:gap-16">
           <div>
-            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-card bg-bg-raise lg:aspect-[4/3]">
+            <div
+              className={`relative w-full overflow-hidden rounded-card bg-bg-raise ${
+                heroAspect ? "" : "aspect-[4/5] lg:aspect-[4/3]"
+              }`}
+              style={heroAspect ? { aspectRatio: heroAspect } : undefined}
+            >
               {story.hero_image && (
-                <img src={story.hero_image} alt="" className="h-full w-full object-cover" />
+                <img
+                  src={story.hero_image}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  onLoad={(e) => {
+                    const img = e.currentTarget;
+                    if (img.naturalWidth > img.naturalHeight) {
+                      setHeroAspect(img.naturalWidth / img.naturalHeight);
+                    }
+                  }}
+                />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/10 to-bg/40" />
 
