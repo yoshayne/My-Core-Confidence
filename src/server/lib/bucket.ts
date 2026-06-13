@@ -32,6 +32,16 @@ export async function uploadImage(
     })
   );
 
-  const base = (process.env.BUCKET_PUBLIC_URL ?? "").replace(/\/$/, "");
+  // Prefer an explicit public URL if set, otherwise fall back to the
+  // S3-compatible endpoint + bucket name (path-style), which Railway's
+  // bucket service exposes as a public HTTPS URL.
+  const base = (
+    process.env.BUCKET_PUBLIC_URL || `${process.env.BUCKET_ENDPOINT ?? ""}/${bucketName}`
+  ).replace(/\/$/, "");
+
+  if (!base || base === "/") {
+    throw new Error("Bucket is not configured: set BUCKET_PUBLIC_URL or BUCKET_ENDPOINT + BUCKET_NAME");
+  }
+
   return `${base}/${key}`;
 }

@@ -42,8 +42,12 @@ adminMediaRoute.post("/upload-image", async (c) => {
   const file = formData?.get("file");
   if (!(file instanceof File)) return c.json({ error: "file is required" }, 400);
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const url = await uploadImage(buffer, file.type || "application/octet-stream", file.name);
-
-  return c.json({ url });
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const url = await uploadImage(buffer, file.type || "application/octet-stream", file.name);
+    return c.json({ url });
+  } catch (err) {
+    console.error("Image upload failed:", err);
+    return c.json({ error: err instanceof Error ? err.message : "Image upload failed" }, 500);
+  }
 });
