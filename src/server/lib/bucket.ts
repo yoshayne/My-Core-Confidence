@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
 
-const bucketName = process.env.BUCKET_NAME ?? "";
+export const bucketName = process.env.BUCKET_NAME ?? "";
 
 export const s3 = new S3Client({
   endpoint: process.env.BUCKET_ENDPOINT,
@@ -13,7 +13,9 @@ export const s3 = new S3Client({
   },
 });
 
-// Uploads a file to the Railway bucket and returns its public URL.
+// Uploads a file to the bucket and returns a URL served by our own
+// /api/media route. Railway's bucket (Tigris) does not honor per-object
+// ACLs, so objects are never directly public — we proxy reads instead.
 export async function uploadImage(
   body: Buffer,
   contentType: string,
@@ -28,20 +30,8 @@ export async function uploadImage(
       Key: key,
       Body: body,
       ContentType: contentType,
-      ACL: "public-read",
     })
   );
 
-  // Prefer an explicit public URL if set, otherwise fall back to the
-  // S3-compatible endpoint + bucket name (path-style), which Railway's
-  // bucket service exposes as a public HTTPS URL.
-  const base = (
-    process.env.BUCKET_PUBLIC_URL || `${process.env.BUCKET_ENDPOINT ?? ""}/${bucketName}`
-  ).replace(/\/$/, "");
-
-  if (!base || base === "/") {
-    throw new Error("Bucket is not configured: set BUCKET_PUBLIC_URL or BUCKET_ENDPOINT + BUCKET_NAME");
-  }
-
-  return `${base}/${key}`;
+  return `/api/media/${key}`;
 }
