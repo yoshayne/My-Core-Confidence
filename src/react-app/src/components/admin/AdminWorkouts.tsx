@@ -61,6 +61,7 @@ export default function AdminWorkouts() {
   const [saving, setSaving] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [videoUploading, setVideoUploading] = useState(false);
+  const [videoProgress, setVideoProgress] = useState<number | null>(null);
   const [thumbUploading, setThumbUploading] = useState(false);
 
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -188,6 +189,7 @@ export default function AdminWorkouts() {
   async function handleVideoFile(file: File) {
     if (editing === "new" || !editing) return;
     setVideoUploading(true);
+    setVideoProgress(0);
     setError(null);
     try {
       const { uploadUrl } = await apiFetch<{ uploadUrl: string; uploadId: string }>(
@@ -198,12 +200,25 @@ export default function AdminWorkouts() {
           body: JSON.stringify({ workoutId: editing.id }),
         }
       );
-      await fetch(uploadUrl, { method: "PUT", body: file });
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", uploadUrl);
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setVideoProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error(`Upload failed with status ${xhr.status}`));
+        };
+        xhr.onerror = () => reject(new Error("Upload failed"));
+        xhr.send(file);
+      });
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to upload video");
     } finally {
       setVideoUploading(false);
+      setVideoProgress(null);
     }
   }
 
@@ -407,16 +422,27 @@ export default function AdminWorkouts() {
                     <Upload className="h-4 w-4" />
                     {videoUploading ? "Uploading…" : "Upload video"}
                   </button>
-                  {editing.mux_status === "pending" && (
+                  {!videoUploading && editing.mux_status === "pending" && (
                     <span className="text-xs text-amber-400">Processing…</span>
                   )}
-                  {editing.mux_status === "ready" && (
+                  {!videoUploading && editing.mux_status === "ready" && (
                     <span className="text-xs text-success">Ready</span>
                   )}
-                  {editing.mux_status === "errored" && (
+                  {!videoUploading && editing.mux_status === "errored" && (
                     <span className="text-xs text-red-400">Upload failed</span>
                   )}
                 </div>
+                {videoUploading && videoProgress !== null && (
+                  <div className="mt-2">
+                    <div className="h-2 w-full overflow-hidden rounded-pill bg-bg-raise">
+                      <div
+                        className="h-full rounded-pill bg-blue transition-all"
+                        style={{ width: `${videoProgress}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-text-secondary">{videoProgress}% uploaded</p>
+                  </div>
+                )}
               </Field>
             )}
 

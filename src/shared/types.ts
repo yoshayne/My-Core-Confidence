@@ -76,7 +76,7 @@ export interface AdminWorkout {
   thumbnail_url: string | null;
   mux_playback_id: string | null;
   mux_asset_id: string | null;
-  mux_status: "pending" | "ready" | "errored";
+  mux_status: "pending" | "ready" | "errored" | null;
   duration_seconds: number | null;
   level: WorkoutLevel;
   category: string | null;
