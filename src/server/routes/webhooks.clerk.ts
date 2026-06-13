@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { Webhook } from "svix";
 import { query } from "../lib/db";
 import { sendWelcomeEmail } from "../lib/brevo";
+import { isAdminEmail } from "../lib/adminEmails";
 
 export const clerkWebhook = new Hono();
 
@@ -36,19 +37,22 @@ clerkWebhook.post("/", async (c) => {
       if (type === "user.created") {
         // Idempotent insert — safe if Clerk retries delivery.
         await query(
-          `INSERT INTO users (clerk_user_id, email, name, avatar_url)
-           VALUES ($1, $2, $3, $4)
+          `INSERT INTO users (clerk_user_id, email, name, avatar_url, is_admin)
+           VALUES ($1, $2, $3, $4, $5)
            ON CONFLICT (clerk_user_id) DO UPDATE
              SET email = EXCLUDED.email, name = EXCLUDED.name,
-                 avatar_url = EXCLUDED.avatar_url, updated_at = now()`,
-          [data.id, email, name, avatar]
+                 avatar_url = EXCLUDED.avatar_url,
+                 is_admin = users.is_admin OR EXCLUDED.is_admin,
+                 updated_at = now()`,
+          [data.id, email, name, avatar, isAdminEmail(email)]
         );
         await sendWelcomeEmail(email, name ?? undefined);
       } else {
         await query(
-          `UPDATE users SET email = $2, name = $3, avatar_url = $4, updated_at = now()
+          `UPDATE users SET email = $2, name = $3, avatar_url = $4,
+             is_admin = is_admin OR $5, updated_at = now()
            WHERE clerk_user_id = $1`,
-          [data.id, email, name, avatar]
+          [data.id, email, name, avatar, isAdminEmail(email)]
         );
       }
     } else if (type === "user.deleted") {
