@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import BottomNav from "../components/BottomNav";
+import AppLayout from "../components/AppLayout";
 import WorkoutCard from "../components/WorkoutCard";
 import { useApi } from "../lib/api";
 import type { WorkoutSummary } from "../../../shared/types";
@@ -27,8 +27,8 @@ export default function Favorites() {
   }, [apiFetch]);
 
   return (
-    <div className="min-h-screen bg-bg pb-24">
-      <div className="mx-auto max-w-md px-4 pt-6">
+    <AppLayout>
+      <div className="mx-auto max-w-md px-4 pt-6 lg:max-w-6xl lg:px-8">
         <div className="flex items-center gap-3">
           <Link
             to="/profile"
@@ -48,14 +48,12 @@ export default function Favorites() {
           </p>
         )}
 
-        <div className="mt-4 grid grid-cols-2 gap-4">
+        <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {(workouts ?? []).map((workout) => (
             <WorkoutCard key={workout.id} workout={workout} />
           ))}
         </div>
       </div>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }

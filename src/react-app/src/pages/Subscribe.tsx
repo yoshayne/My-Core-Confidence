@@ -66,7 +66,7 @@ export default function Subscribe() {
 
   return (
     <div className="min-h-screen bg-bg px-4 pt-6 pb-10">
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-lg lg:pt-10">
         <div className="flex justify-end">
           <button
             type="button"

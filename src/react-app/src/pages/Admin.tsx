@@ -35,7 +35,7 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-bg pb-10">
-      <div className="mx-auto max-w-md px-4 pt-6">
+      <div className="mx-auto max-w-md px-4 pt-6 lg:max-w-4xl lg:px-8">
         <h1 className="text-2xl font-bold">Admin</h1>
 
         <div className="mt-4 flex gap-1 rounded-button border border-card-border bg-card p-1">

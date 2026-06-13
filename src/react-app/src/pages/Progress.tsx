@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, ChevronRight } from "lucide-react";
-import BottomNav from "../components/BottomNav";
+import AppLayout from "../components/AppLayout";
 import { useApi, formatDuration } from "../lib/api";
 import type { ProgressStats } from "../../../shared/types";
 
@@ -39,8 +39,8 @@ export default function Progress() {
   const maxCount = Math.max(1, ...(stats?.weekly.map((d) => d.count) ?? [0]));
 
   return (
-    <div className="min-h-screen bg-bg pb-24">
-      <div className="mx-auto max-w-md px-4 pt-6">
+    <AppLayout>
+      <div className="mx-auto max-w-md px-4 pt-6 lg:max-w-3xl lg:px-8">
         <h1 className="text-2xl font-bold">Progress</h1>
 
         {error && <p className="mt-6 text-sm text-red-400">{error}</p>}
@@ -105,8 +105,6 @@ export default function Progress() {
           ))}
         </div>
       </div>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }

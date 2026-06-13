@@ -11,7 +11,7 @@ import {
   Youtube,
   Music2,
 } from "lucide-react";
-import BottomNav from "../components/BottomNav";
+import AppLayout from "../components/AppLayout";
 import { useApi } from "../lib/api";
 import type { StoryContent, UserProfile } from "../../../shared/types";
 
@@ -74,8 +74,8 @@ export default function Profile() {
   ];
 
   return (
-    <div className="min-h-screen bg-bg pb-24">
-      <div className="relative h-72 w-full">
+    <AppLayout>
+      <div className="relative h-72 w-full lg:rounded-card lg:overflow-hidden">
         {story?.profile_image ? (
           <img src={story.profile_image} alt="" className="h-full w-full object-cover" />
         ) : (
@@ -84,7 +84,7 @@ export default function Profile() {
         <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/40 to-transparent" />
       </div>
 
-      <div className="relative -mt-10 mx-auto max-w-md px-4">
+      <div className="relative -mt-10 mx-auto max-w-md px-4 lg:max-w-3xl lg:px-8">
         {error && <p className="mb-3 text-sm text-red-400">{error}</p>}
 
         <h1 className="text-2xl font-bold">{story?.profile_title || "Hey, I'm Donovan."}</h1>
@@ -143,9 +143,7 @@ export default function Profile() {
           <AccountRow icon={LogOut} label="Sign out" onClick={() => signOut()} />
         </div>
       </div>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }
 
